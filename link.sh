@@ -5,3 +5,6 @@ fi
 
 # stow nvim config
 stow nvim
+
+# stow zsh/zimfw config
+stow zsh
