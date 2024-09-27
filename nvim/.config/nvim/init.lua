@@ -437,6 +437,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         htmlangular = { 'eslint', 'prettierd', 'prettier', stop_after_first = true },
+        sh = { 'shfmt' },
       },
     },
   },
