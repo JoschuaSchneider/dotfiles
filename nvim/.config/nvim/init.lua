@@ -282,7 +282,14 @@ require('lazy').setup({
         angularls = {
           filetypes = { 'typescript', 'html', 'typescriptreact', 'typescript.tsx', 'angular.html' },
         },
-        jsonls = {},
+        jsonls = {
+          settings = {
+            json = {
+              schemas = require('schemastore').json.schemas(),
+              validate = { enable = true },
+            },
+          },
+        },
         html = {},
         cssls = {},
         phpactor = {},
@@ -438,6 +445,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         htmlangular = { 'eslint', 'prettierd', 'prettier', stop_after_first = true },
         sh = { 'shfmt' },
+        markdown = { 'markdownlint' },
       },
     },
   },
