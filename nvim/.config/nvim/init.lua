@@ -465,6 +465,15 @@ require('lazy').setup({
         dependencies = {
           -- TODO: Import my current snippets
         },
+        config = function(_, opts)
+          local ls = require 'luasnip'
+          ls.setup(opts)
+
+          local editorconf = require 'custom.snippets.editorconfig'
+
+          -- Setup custom snippets
+          editorconf.editorconf()
+        end,
       },
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
