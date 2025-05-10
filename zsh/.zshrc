@@ -1,3 +1,4 @@
+export PATH=/opt/homebrew/bin:$PATH
 export SPACESHIP_GIT_STATUS_COLOR="magenta"
 export SPACESHIP_VI_MODE_COLOR=249
 export SPACESHIP_VI_MODE_INSERT="I"
@@ -87,7 +88,7 @@ esac
 
 # enable fzf fuzzy-finder
 # TODO: Broken, fix
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # enable zoxide
 eval "$(zoxide init zsh --cmd cd)"
@@ -106,6 +107,13 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/plat
 
 # fzf tab completion
 # TODO: Broken, fix
-source ~/.config/zsh/fzf-tab-completion/zsh/fzf-zsh-completion.sh
-bindkey '^I' fzf_completion
+# source ~/.config/zsh/fzf-tab-completion/zsh/fzf-zsh-completion.sh
+# bindkey '^I' fzf_completion
 zstyle ':completion:*:*:git:*' fzf-search-display true
+
+# bun completions
+[ -s "/Users/joschuaschneider/.bun/_bun" ] && source "/Users/joschuaschneider/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

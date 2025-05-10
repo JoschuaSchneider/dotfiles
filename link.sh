@@ -4,7 +4,7 @@ if ! command -v "stow" &>/dev/null; then
 fi
 
 # stow nvim config
-stow nvim
+stow -t $HOME nvim
 
 # stow zsh/zimfw config
-stow zsh
+stow -t $HOME zsh
