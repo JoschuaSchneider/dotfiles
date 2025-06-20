@@ -87,6 +87,10 @@ if not vim.uv.fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
+-- AOC
+
+require('custom.plugins.local.aoc').setup()
+
 require('lazy').setup({
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
@@ -220,10 +224,18 @@ require('lazy').setup({
           map('gy', require('telescope.builtin').lsp_type_definitions, '[G]oto T[Y]pe Definition')
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
           map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
           map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          -- map('<leader>cA', function()
+          --   vim.lsp.buf.code_action {
+          --     range = {
+          --       start = { line = 0, character = 0 },
+          --       ['end'] = { line = vim.fn.line '$' - 1, character = 0 },
+          --     },
+          --   }
+          -- end, 'Global [C]ode [A]ction')
+          -- vim.keymap.set('x', '<leader>ca', vim.lsp.buf.range_code_action, { buffer = event.buf, desc = 'LSP: ' .. 'Range [C]ode [A]ction' })
           map('K', vim.lsp.buf.hover, 'Hover Documentation')
           map('<leader>k', vim.diagnostic.open_float, 'Hover Diagnostics')
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -271,10 +283,27 @@ require('lazy').setup({
         clangd = {},
         gopls = {},
         rust_analyzer = {},
-        tsserver = {
-          root_dir = nvim_lsp.util.root_pattern 'package.json',
+        ts_ls = {
+          root_dir = function()
+            return not vim.fs.root(0, { 'deno.json', 'deno.jsonc' })
+              and vim.fs.root(0, {
+                'tsconfig.json',
+                'jsconfig.json',
+                'package.json',
+              })
+          end,
           single_file_support = false,
         },
+        helm_ls = {
+          settings = {
+            ['helm-ls'] = {
+              yamlls = {
+                path = 'yaml-language-server',
+              },
+            },
+          },
+        },
+        yamlls = {},
         biome = {},
         denols = {
           root_dir = nvim_lsp.util.root_pattern('deno.json', 'deno.jsonc'),
@@ -293,10 +322,11 @@ require('lazy').setup({
         html = {},
         cssls = {},
         phpactor = {},
+        arduino_language_server = {},
 
         -- swift, objective-c
         sourcekit = {
-          cmd = { '/usr/bin/sourcekit-lsp' },
+          cmd = { vim.trim(vim.fn.system 'xcrun -f sourcekit-lsp') },
           capabilities = {
             workspace = {
               didChangeWatchedFiles = {
@@ -304,6 +334,12 @@ require('lazy').setup({
               },
             },
           },
+          on_init = function(client)
+            -- HACK: to fix some issues with LSP
+            -- more details: https://github.com/neovim/neovim/issues/19237#issuecomment-2237037154
+            client.offset_encoding = 'utf-8'
+          end,
+          -- cmd = { '/usr/bin/sourcekit-lsp' },
         },
 
         lua_ls = {
@@ -416,38 +452,6 @@ require('lazy').setup({
 
       setup_sourcekit()
     end,
-  },
-
-  {
-    'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_fallback = true }
-        end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        local disable_filetypes = { c = true, cpp = true }
-        return {
-          timeout_ms = 500,
-          lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
-        }
-      end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        htmlangular = { 'eslint', 'prettierd', 'prettier', stop_after_first = true },
-        sh = { 'shfmt' },
-        markdown = { 'markdownlint' },
-      },
-    },
   },
 
   {
@@ -644,6 +648,7 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns',
+  require 'kickstart.plugins.debug',
   { import = 'custom.plugins' },
 }, {
   ui = {

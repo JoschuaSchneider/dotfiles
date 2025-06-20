@@ -4,7 +4,7 @@ return {
     'nvim-lua/plenary.nvim',
   },
   keys = {
-    { '<leader>r', '<cmd>Spectre<cr>', desc = '[R]eplace with Spectre' },
+    -- { '<leader>r', '<cmd>Spectre<cr>', desc = '[R]eplace with Spectre' },
   },
   opts = {
     replace_engine = {
