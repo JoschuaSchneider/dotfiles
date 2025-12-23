@@ -5,7 +5,7 @@ local t = ls.text_node
 
 local M = {}
 
-function M.editorconf()
+function M.init()
   local snippet = s('editorconf', {
     t {
       'root = true',

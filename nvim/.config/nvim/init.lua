@@ -3,6 +3,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.opt.backupcopy = 'yes'
+
 vim.g.have_nerd_font = true
 
 vim.opt.number = true
@@ -36,12 +38,16 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '▎ ', trail = '·', nbsp = '␣' }
 vim.opt.inccommand = 'split'
 
 vim.opt.cursorline = true
 
 vim.opt.scrolloff = 10
+
+-- Terminal title (shows in Ghostty tabs)
+vim.opt.title = true
+vim.opt.titlestring = 'nvim:%{fnamemodify(getcwd(), ":t")}'
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
@@ -141,9 +147,24 @@ require('lazy').setup({
     },
     config = function()
       require('telescope').setup {
+        defaults = {
+          preview = {
+            treesitter = false,
+            filesize_hook = function(filepath, bufnr, opts)
+              local max_bytes = 10000
+              local cmd = { 'head', '-c', max_bytes, filepath }
+              require('telescope.previewers.utils').job_maker(cmd, bufnr, opts)
+            end,
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
+          },
+          nodescripts = {
+            command = 'bun run', -- Use bun instead of npm
+            display_method = 'vsplit', -- Open in vertical split
+            ignore_pre_post = true, -- Ignore pre/post scripts
           },
         },
       }
@@ -197,258 +218,6 @@ require('lazy').setup({
     },
   },
   { 'Bilal2453/luvit-meta', lazy = true },
-  {
-    'neovim/nvim-lspconfig',
-    event = { 'BufReadPre', 'BufNewFile' },
-    dependencies = {
-      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
-      'williamboman/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
-      { 'j-hui/fidget.nvim', opts = {} },
-
-      'hrsh7th/cmp-nvim-lsp',
-    },
-    config = function()
-      vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
-        callback = function(event)
-          local map = function(keys, func, desc)
-            vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-          end
-
-          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-          map('gy', require('telescope.builtin').lsp_type_definitions, '[G]oto T[Y]pe Definition')
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-          map('<leader>cr', vim.lsp.buf.rename, '[C]ode [R]ename')
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-          map('K', vim.lsp.buf.hover, 'Hover Documentation')
-          map('<leader>k', vim.diagnostic.open_float, 'Hover Diagnostics')
-          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.document_highlight,
-            })
-
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.clear_references,
-            })
-
-            vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-              end,
-            })
-          end
-
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, '[T]oggle Inlay [H]ints')
-          end
-        end,
-      })
-
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
-
-      local nvim_lsp = require 'lspconfig'
-      local servers = {
-        emmet_ls = {
-          filetypes = { 'astro', 'css', 'eruby', 'html', 'htmldjango', 'less', 'pug', 'sass', 'scss', 'svelte', 'vue', 'htmlangular' },
-        },
-        clangd = {},
-        gopls = {},
-        rust_analyzer = {},
-        tsserver = {
-          root_dir = nvim_lsp.util.root_pattern 'package.json',
-          single_file_support = false,
-        },
-        biome = {},
-        denols = {
-          root_dir = nvim_lsp.util.root_pattern('deno.json', 'deno.jsonc'),
-        },
-        angularls = {
-          filetypes = { 'typescript', 'html', 'typescriptreact', 'typescript.tsx', 'angular.html' },
-        },
-        jsonls = {
-          settings = {
-            json = {
-              schemas = require('schemastore').json.schemas(),
-              validate = { enable = true },
-            },
-          },
-        },
-        html = {},
-        cssls = {},
-        phpactor = {},
-
-        -- swift, objective-c
-        sourcekit = {
-          cmd = { '/usr/bin/sourcekit-lsp' },
-          capabilities = {
-            workspace = {
-              didChangeWatchedFiles = {
-                dynamicRegistration = true,
-              },
-            },
-          },
-        },
-
-        lua_ls = {
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
-            },
-          },
-        },
-
-        -- TODO: Handpick defaults
-        tailwindcss = {
-          filetypes = {
-            'aspnetcorerazor',
-            'astro',
-            'astro-markdown',
-            'blade',
-            'clojure',
-            'django-html',
-            'htmldjango',
-            'edge',
-            'eelixir',
-            'elixir',
-            'ejs',
-            'erb',
-            'eruby',
-            'gohtml',
-            'gohtmltmpl',
-            'haml',
-            'handlebars',
-            'hbs',
-            'html',
-            'html-eex',
-            'heex',
-            'jade',
-            'leaf',
-            'liquid',
-            'markdown',
-            'mdx',
-            'mustache',
-            'njk',
-            'nunjucks',
-            'php',
-            'razor',
-            'slim',
-            'twig',
-            'css',
-            'less',
-            'postcss',
-            'sass',
-            'scss',
-            'stylus',
-            'sugarss',
-            'javascript',
-            'javascriptreact',
-            'reason',
-            'rescript',
-            'typescript',
-            'typescriptreact',
-            'vue',
-            'svelte',
-            'templ',
-          },
-          settings = {
-            tailwindCSS = {
-              experimental = {
-                classRegex = {
-                  -- enable in all strings:
-                  -- { '(["\'`][^"\'`]*.*?["\'`])', '["\'`]([^"\'`]*).*?["\'`]' },
-                  { 'cva\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
-                  { 'variants\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
-                  { 'cx\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
-                },
-              },
-            },
-          },
-        },
-      }
-
-      require('mason').setup()
-
-      local ensure_installed = {}
-      for key, _ in pairs(servers or {}) do
-        if not key == 'sourcekit' then
-          table.insert(ensure_installed, key)
-        end
-      end
-      vim.list_extend(ensure_installed, {
-        'stylua',
-      })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-      local function setup_sourcekit()
-        local server = servers.sourcekit or {}
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-        require('lspconfig').sourcekit.setup(server)
-      end
-
-      require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-      }
-
-      setup_sourcekit()
-    end,
-  },
-
-  {
-    'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_fallback = true }
-        end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        local disable_filetypes = { c = true, cpp = true }
-        return {
-          timeout_ms = 500,
-          lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
-        }
-      end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        htmlangular = { 'eslint', 'prettierd', 'prettier', stop_after_first = true },
-        sh = { 'shfmt' },
-        markdown = { 'markdownlint' },
-      },
-    },
-  },
 
   {
     'hrsh7th/nvim-cmp',
@@ -469,16 +238,17 @@ require('lazy').setup({
           local ls = require 'luasnip'
           ls.setup(opts)
 
-          local editorconf = require 'custom.snippets.editorconfig'
+          local snippets = require 'custom.snippets.snippets'
 
           -- Setup custom snippets
-          editorconf.editorconf()
+          snippets.init()
         end,
       },
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-nvim-lsp-signature-help',
       'hrsh7th/cmp-path',
+      'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-cmdline',
       'onsails/lspkind.nvim',
     },
@@ -577,6 +347,19 @@ require('lazy').setup({
       -- No comment styling
       vim.cmd.hi 'Comment gui=none'
     end,
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = 'transparent',
+        floats = 'transparent',
+      },
+      on_highlights = function(hl, c)
+        hl.NormalFloat = {
+          bg = c.bg_dark,
+          fg = c.fg_dark,
+        }
+      end,
+    },
   },
 
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },

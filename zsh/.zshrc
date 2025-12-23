@@ -1,9 +1,23 @@
-export PATH=/opt/homebrew/bin:$PATH
+# eval "$(starship init zsh)"
+
+export PATH=/opt/homebrew/bin:~/Library/Python/3.9/bin:$PATH
+export PATH=$PATH:`go env GOPATH`/bin
 export SPACESHIP_GIT_STATUS_COLOR="magenta"
 export SPACESHIP_VI_MODE_COLOR=249
-export SPACESHIP_VI_MODE_INSERT="I"
-export SPACESHIP_VI_MODE_NORMAL="N"
+export SPACESHIP_VI_MODE_INSERT="@insert"
+export SPACESHIP_VI_MODE_NORMAL="@normal"
 export KEYTIMEOUT=1
+export SPACESHIP_KUBECTL_SHOW=true
+export SPACESHIP_KUBECTL_VERSION_SHOW=false
+export SPACESHIP_KUBECTL_SYMBOL="ctx/"
+export SPACESHIP_GCLOUD_SHOW=false
+export SPACESHIP_AZURE_SHOW=false
+export SPACESHIP_BUN_SYMBOL="bun/"
+export SPACESHIP_NODE_SYMBOL="node/"
+export SPACESHIP_GOLANG_SYMBOL="go/"
+export SPACESHIP_GIT_SYMBOL="git/"
+export SPACESHIP_LUA_SYMBOL="lua/"
+export SPACESHIP_RUST_SYMBOL="rust/"
 
 # Remove older command from the history if a duplicate is to be added.
 setopt HIST_IGNORE_ALL_DUPS
@@ -25,6 +39,10 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # ------------------
 # Initialize modules
 # ------------------
+
+# Prevent zimfw completion module from calling compinit
+# (it will be called by later completion scripts like dart-cli, tinygo, etc.)
+zstyle ':zim:completion' disable-compinit yes
 
 ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
 # Download zimfw plugin manager if missing.
@@ -112,8 +130,40 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/plat
 zstyle ':completion:*:*:git:*' fzf-search-display true
 
 # bun completions
-[ -s "/Users/joschuaschneider/.bun/_bun" ] && source "/Users/joschuaschneider/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+## [Completion]
+## Completion scripts setup. Remove the following line to uninstall
+[[ -f "$HOME/.dart-cli-completion/zsh-config.zsh" ]] && . "$HOME/.dart-cli-completion/zsh-config.zsh" || true
+## [/Completion]
+export GEM_HOME=$(ruby -e 'puts Gem.user_dir')
+export PATH="$HOME/.gem/ruby/3.4.0/bin:$PATH"
+
+
+eval "$(tinygo-edit --completion-script-zsh)"
+
+eval "$(direnv hook zsh)"
+
+export PATH="/opt/homebrew/opt/mysql@8.0/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f "$HOME/Downloads/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/path.zsh.inc"; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/Downloads/google-cloud-sdk/completion.zsh.inc"; fi
+
+# Ensure compinit is called (in case no completion script called it)
+autoload -Uz compinit && compinit -C
+
+. "$HOME/.local/bin/env"
+
+
+# Shopify Hydrogen alias to local projects
+alias h2='$(npm prefix -s)/node_modules/.bin/shopify hydrogen'
