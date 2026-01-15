@@ -144,8 +144,6 @@ export GEM_HOME=$(ruby -e 'puts Gem.user_dir')
 export PATH="$HOME/.gem/ruby/3.4.0/bin:$PATH"
 
 
-eval "$(tinygo-edit --completion-script-zsh)"
-
 eval "$(direnv hook zsh)"
 
 export PATH="/opt/homebrew/opt/mysql@8.0/bin:$PATH"
