@@ -129,8 +129,15 @@ return {
       },
       html = {},
       cssls = {},
-      phpactor = {},
-      graphql = {},
+      graphql = {
+        filetypes = {
+          'graphql',
+          'typescript',
+          'javascript',
+          'typescriptreact',
+          'javascriptreact',
+        },
+      },
 
       basedpyright = {},
 
@@ -202,15 +209,12 @@ return {
       local server = servers.sourcekit or {}
       server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
       vim.lsp.config('sourcekit', server)
-      vim.lsp.enable('sourcekit')
+      vim.lsp.enable 'sourcekit'
     end
 
     require('mason-lspconfig').setup {
       handlers = {
         function(server_name)
-          if string.find(server_name, 'tailwind') then
-            print(server_name)
-          end
           local server = servers[server_name] or {}
           server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
           vim.lsp.config(server_name, server)
@@ -270,7 +274,7 @@ return {
       },
     }
     vim.lsp.config('ts_ls', ts_ls_config)
-    vim.lsp.enable('ts_ls')
+    vim.lsp.enable 'ts_ls'
 
     setup_sourcekit()
   end,

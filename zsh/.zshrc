@@ -112,8 +112,9 @@ esac
 eval "$(zoxide init zsh --cmd cd)"
 
 # alias vi="nvim"
+export NVIM_APPNAME="nvim-new"
 alias n="nvim"
-alias nvimc="nvim -c\"cd ~/.config/nvim\""
+alias nvimc="nvim -c\"cd ~/.config/nvim-new\""
 alias nvault="nvim -c\"cd ~/.obsidian/nvault\""
 alias qrpaste='zbarimg -q --raw <(pngpaste -)'
 alias patchgen="PATCHNAME=\"$(uuidgen | tr A-f a-f).patch\" && git diff > ~/patches/\$PATCHNAME && open -R ~/patches/\$PATCHNAME"
