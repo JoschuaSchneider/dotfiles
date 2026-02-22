@@ -40,6 +40,7 @@ vim.o.scrolloff = 10
 
 vim.o.confirm = true
 
+vim.opt.title = true
 vim.opt.titlestring = 'nvim:%{fnamemodify(getcwd(), ":t")}'
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -240,8 +241,22 @@ require('lazy').setup {
     'nvim-treesitter/nvim-treesitter',
     config = function()
       local filetypes = {
-        'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline',
-        'query', 'vim', 'vimdoc', 'typescript', 'tsx', 'javascript', 'json', 'css',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'typescript',
+        'tsx',
+        'javascript',
+        'json',
+        'css',
       }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
