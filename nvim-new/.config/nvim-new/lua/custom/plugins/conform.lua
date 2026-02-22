@@ -55,7 +55,7 @@ return { -- Autoformat
       typescript = { 'prettierd', 'prettier', stop_after_first = true },
       typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
       sh = { 'shfmt' },
-      markdown = { 'markdownlint' },
+      markdown = { 'oxfmt' },
       go = { 'gofmt' },
       yaml = { 'yamlfmt' },
       sql = { 'pg_format' },
