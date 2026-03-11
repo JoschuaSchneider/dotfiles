@@ -61,6 +61,7 @@ return { -- Autoformat
       sql = { 'pg_format' },
       solidity = { 'prettier' },
       python = { 'ruff' },
+      json = { 'oxfmt' },
     },
   },
 }
