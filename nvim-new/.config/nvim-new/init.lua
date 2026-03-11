@@ -119,6 +119,7 @@ require('lazy').setup {
   {
     'nvim-telescope/telescope.nvim',
     enabled = true,
+    event = 'VeryLazy',
     cmd = 'Telescope',
     keys = {
       { '<leader>sh', function() require('telescope.builtin').help_tags() end, desc = '[S]earch [H]elp' },
@@ -232,7 +233,7 @@ require('lazy').setup {
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     config = function()
-      local filetypes = {
+      local parsers = {
         'bash',
         'c',
         'diff',
@@ -250,9 +251,14 @@ require('lazy').setup {
         'json',
         'css',
       }
-      require('nvim-treesitter').install(filetypes)
+      local highlight_filetypes = vim.list_extend(vim.deepcopy(parsers), {
+        'javascriptreact',
+        'typescriptreact',
+      })
+
+      require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
-        pattern = filetypes,
+        pattern = highlight_filetypes,
         callback = function() vim.treesitter.start() end,
       })
     end,
