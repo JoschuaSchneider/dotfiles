@@ -52,8 +52,11 @@ return {
         if client and client:supports_method('textDocument/inlayHint', event.buf) then
           map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
         end
+
       end,
     })
+
+    vim.lsp.document_color.enable(true, nil, { style = 'virtual' })
 
     local capabilities = require('blink.cmp').get_lsp_capabilities()
 

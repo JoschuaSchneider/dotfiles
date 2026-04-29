@@ -1,6 +1,6 @@
 # eval "$(starship init zsh)"
 
-export PATH=/opt/homebrew/bin:~/Library/Python/3.9/bin:$PATH
+export PATH=/opt/homebrew/bin:/opt/homebrew/opt/libpq/bin:~/Library/Python/3.9/bin:$PATH
 export PATH=$PATH:`go env GOPATH`/bin
 export SPACESHIP_GIT_STATUS_COLOR="magenta"
 export SPACESHIP_VI_MODE_COLOR=249
@@ -104,9 +104,7 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# enable fzf fuzzy-finder
-# TODO: Broken, fix
-# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 # enable zoxide
 eval "$(zoxide init zsh --cmd cd)"

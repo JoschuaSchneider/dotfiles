@@ -250,6 +250,7 @@ require('lazy').setup {
         'javascript',
         'json',
         'css',
+        'sql',
       }
       local highlight_filetypes = vim.list_extend(vim.deepcopy(parsers), {
         'javascriptreact',

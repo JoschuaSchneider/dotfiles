@@ -52,8 +52,8 @@ return { -- Autoformat
     formatters_by_ft = {
       lua = { 'stylua' },
       htmlangular = { 'eslint', 'prettierd', 'prettier', stop_after_first = true },
-      typescript = { 'prettierd', 'prettier', stop_after_first = true },
-      typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      typescript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+      typescriptreact = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
       sh = { 'shfmt' },
       markdown = { 'oxfmt' },
       go = { 'gofmt' },
@@ -61,7 +61,8 @@ return { -- Autoformat
       sql = { 'pg_format' },
       solidity = { 'prettier' },
       python = { 'ruff' },
-      json = { 'oxfmt' },
+      json = { 'biome', 'oxfmt', stop_after_first = true },
+      sh = { 'shfmt' },
     },
   },
 }
